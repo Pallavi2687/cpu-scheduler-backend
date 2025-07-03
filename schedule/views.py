@@ -28,7 +28,12 @@ def schedule_view(request):
         })
 
     except Exception as e:
-        return JsonResponse({
-            "error": str(e),
-            "trace": traceback.format_exc()
-        }, status=500)
+    # ✅ Log full traceback to Render logs
+       print("❌ Exception in /api/schedule/:")
+    traceback.print_exc()
+
+    return JsonResponse({
+        "error": str(e),
+        "trace": traceback.format_exc()
+    }, status=500)
+
