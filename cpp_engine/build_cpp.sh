@@ -1,17 +1,5 @@
 #!/bin/bash
 
-<<<<<<< HEAD
-# Exit if any command fails
-set -e
-
-# Navigate to the directory where this script is located
-cd "$(dirname "$0")"
-
-# Compile all .cpp files into a single executable
-g++ -std=c++17 -o scheduler_exec *.cpp
-
-# Make the output executable (Linux-specific)
-=======
 # Navigate to the cpp_engine folder (where this script should live)
 cd "$(dirname "$0")"
 
@@ -19,7 +7,6 @@ cd "$(dirname "$0")"
 g++ -std=c++17 -o scheduler_exec *.cpp
 
 # Make the output executable
->>>>>>> 7fec8985cc0d25f7d282d4c5f6bc308c0f017aa4
 chmod +x scheduler_exec
 
 echo "✅ Build successful! Executable created: scheduler_exec"
