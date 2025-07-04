@@ -2,7 +2,7 @@ import subprocess, os, traceback
 
 def run_scheduler(algorithm, processes, quantum=4):
     exe_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '../cpp_engine/scheduler_exec.exe')
+        os.path.join(os.path.dirname(__file__), '../cpp_engine/scheduler_exec')
     )
 
     # Prepare input
