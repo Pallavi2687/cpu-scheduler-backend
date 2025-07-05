@@ -1,11 +1,14 @@
 import subprocess, os, traceback
+from pathlib import Path
+import platform
 
 def run_scheduler(algorithm, processes, quantum=4):
-    exe_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '../cpp_engine/scheduler_exec')
-    )
-
-    # Prepare input
+    exe_name = "scheduler_exec.exe" if platform.system() == "Windows" else "scheduler_exec"
+    base_dir = Path(__file__).resolve().parents[1]
+    exe_path = base_dir / "cpp_engine" / exe_name   
+    # -------------------------------------------------------------
+    # Prepare input string for C++ executable
+    # -------------------------------------------------------------
     input_lines = [f"ALGORITHM {algorithm.upper()}", str(len(processes))]
     for p in processes:
         line = f"{p['pid']} {p['arrival']} {p['burst']}"
@@ -20,7 +23,7 @@ def run_scheduler(algorithm, processes, quantum=4):
 
     try:
         result = subprocess.run(
-            [exe_path],
+            [str(exe_path)],
             input=input_text,
             capture_output=True,
             text=True,
@@ -29,7 +32,7 @@ def run_scheduler(algorithm, processes, quantum=4):
 
         output_lines = result.stdout.strip().splitlines()
 
-        # Parse Gantt chart from C++ output
+        # Parse Gantt chart
         gantt = []
         for line in output_lines:
             if line.startswith("PID"):
@@ -38,13 +41,13 @@ def run_scheduler(algorithm, processes, quantum=4):
                 start, end = map(int, parts[1].strip().split("->"))
                 gantt.append({"pid": pid, "start": start, "end": end})
 
-        # Compute Completion Times (handle preemptive algorithms)
+        # Completion Time logic
         completion = {}
         for entry in gantt:
             pid = entry['pid']
             completion[pid] = max(completion.get(pid, 0), entry['end'])
 
-        # Calculate CT, TAT, WT for each process
+        # Final table
         table = []
         for p in processes:
             pid = p['pid']
@@ -62,7 +65,6 @@ def run_scheduler(algorithm, processes, quantum=4):
                 "waiting": wt
             })
 
-        # Calculate averages
         n = len(table)
         avg_ct = sum(p["completion"] for p in table) / n if n else 0
         avg_tat = sum(p["turnaround"] for p in table) / n if n else 0
@@ -77,7 +79,7 @@ def run_scheduler(algorithm, processes, quantum=4):
                 "waiting": round(avg_wt, 2)
             },
             "debug": {
-                "exe_path": exe_path,
+                "exe_path": str(exe_path),
                 "input": input_text,
                 "raw_output": result.stdout
             }
@@ -89,7 +91,7 @@ def run_scheduler(algorithm, processes, quantum=4):
             "table": [],
             "averages": {},
             "debug": {
-                "exe_path": exe_path,
+                "exe_path": str(exe_path),
                 "input": input_text,
                 "raw_output": "❌ FileNotFoundError: Executable not found."
             },
@@ -102,7 +104,7 @@ def run_scheduler(algorithm, processes, quantum=4):
             "table": [],
             "averages": {},
             "debug": {
-                "exe_path": exe_path,
+                "exe_path": str(exe_path),
                 "input": input_text,
                 "raw_output": e.stdout + "\n" + (e.stderr or "")
             },
@@ -115,7 +117,7 @@ def run_scheduler(algorithm, processes, quantum=4):
             "table": [],
             "averages": {},
             "debug": {
-                "exe_path": exe_path,
+                "exe_path": str(exe_path),
                 "input": input_text,
                 "raw_output": traceback.format_exc()
             },

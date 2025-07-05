@@ -1,15 +1,20 @@
 """
 Django settings for cpu‑scheduler backend (Render deployment)
 """
-
+import os
+from dotenv import load_dotenv
 from pathlib import Path
 from decouple import config, Csv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ───────────────────────────────────────────────────────────────── SECURITY ────
 SECRET_KEY  = config("DJANGO_SECRET_KEY")
 DEBUG       = config("DJANGO_DEBUG", default=False, cast=bool)
+
+print(f"dusra: {SECRET_KEY }")
 
 ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS",
@@ -32,10 +37,10 @@ INSTALLED_APPS = [
 
 # ────────────────────────────────────────── MIDDLEWARE ───
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",       # ← must be first that modifies response
+    "corsheaders.middleware.CorsMiddleware",  
+     "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -84,15 +89,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ───────────────────────────────────────────── CORS ───
 # 1. Production front‑end URL
 # 2. ANY Vercel preview build that begins with 'cpu-scheduler-fron-…'
-# ───────────────────────────────────────────── CORS ───
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://cpu-scheduler-frontend\.vercel\.app$",      # production
-    r"^https://cpu-scheduler-frontend-.*\.vercel\.app$",   # previews ← fixed
+## ──────────────── CORS + CSRF for both local & production ────────────────
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+     os.getenv("CORS_ALLOWED_ORIGINS"),
 ]
-
-CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://cpu-scheduler-frontend.vercel.app",           # production
-    "https://cpu-scheduler-frontend-*.vercel.app",         # previews ← fixed
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+     os.getenv("CORS_ALLOWED_ORIGINS"),
+
 ]
+CORS_ALLOW_CREDENTIALS = True
+
+print("🧪 DEBUG CORS:")
+print("CORS_ALLOWED_ORIGINS:", CORS_ALLOWED_ORIGINS)
+print("CORS_ALLOW_CREDENTIALS:", CORS_ALLOW_CREDENTIALS)
+print("INSTALLED_APPS:", INSTALLED_APPS)
+print("MIDDLEWARE:", MIDDLEWARE)
